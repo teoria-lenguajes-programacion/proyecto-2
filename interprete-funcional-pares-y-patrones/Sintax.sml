@@ -39,6 +39,9 @@ datatype Expresion =
 
 and      Declaracion =
            ValDecl of Recurrencia * Patron * Expresion
+         | AndDecl of Declaracion * Declaracion  
+         | SecDecl of Declaracion * Declaracion
+         | LocalDecl of Declaracion * Declaracion                  
 
 and      Patron =
            ConstPat   of Literal

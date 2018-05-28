@@ -34,8 +34,9 @@ fun evalExp ambiente exp =
          in Par (valI, valD)
          end
   | LetExp (dec, exp)
-      => let val ambLocal = evalDec ambiente dec
-         in evalExp (ambiente <+> ambLocal) exp
+      => let val ambientePrima = evalDec ambiente dec
+          (*;  val ambientePrima = (ambiente <+> ambLocal) *)
+         in evalExp ambientePrima exp
          end
          
         
@@ -81,8 +82,29 @@ and evalDec ambiente dec =
   case dec of 
     ValDecl ((NoRecursiva, pat, expLocal))
       => let val valor = evalExp ambiente expLocal 
-        in concordar pat valor
-        end 
+           ; val ambLocal = concordar pat valor
+        in (ambiente <+> ambLocal)
+        end
+  | ValDecl ((Recursiva, pat, expLocal))
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+        in (ambiente <+> (desenrollar ambLocal))
+        end
+  | AndDecl (dec1, dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec ambiente dec2
+          in  amb1 <+> amb2 
+          end
+  | SecDecl (dec1,dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec (ambiente <+> amb1) dec2
+          in  amb1 <+> amb2
+          end
+  | LocalDecl (dec1,dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec (ambiente <+> amb1) dec2
+          in  amb2
+          end                     
 ;
 
 (* Los programas son expresiones en nuestro lenguaje.  Los unicos
