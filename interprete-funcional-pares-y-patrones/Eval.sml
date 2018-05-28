@@ -33,18 +33,25 @@ fun evalExp ambiente exp =
              and valD = evalExp ambiente expD
          in Par (valI, valD)
          end
-  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
+  | LetExp (dec, exp)
+      => let val ambLocal = evalDec ambiente dec
+         in evalExp (ambiente <+> ambLocal) exp
+         end
+         
+        
+            
+  (*| LetExp ((NoRecursiva,(pat,expLocal)), exp)
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
          in evalExp (ambiente <+> ambLocal) exp
-         end
+         end*)
     (* cuando una declaración local es recursiva, se prepara el
        ambiente "desenrollándolo" *)
-  | LetExp ((Recursiva,(pat,expLocal)), exp)
+(*  | LetExp ((Recursiva,(pat,expLocal)), exp)
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
          in evalExp (ambiente <+> (desenrollar ambLocal)) exp
-         end
+         end*)
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -69,6 +76,13 @@ and aplicarReglas ambiente reglas valor =
        end
        handle PatronesNoConcuerdan   (* seguir con otras reglas *)
               => aplicarReglas ambiente masReglas valor
+
+and evalDec ambiente dec = 
+  case dec of 
+    ValDecl ((NoRecursiva, pat, expLocal))
+      => let val valor = evalExp ambiente expLocal 
+        in concordar pat valor
+        end 
 ;
 
 (* Los programas son expresiones en nuestro lenguaje.  Los unicos

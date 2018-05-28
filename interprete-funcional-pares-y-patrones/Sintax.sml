@@ -37,6 +37,9 @@ datatype Expresion =
          | ApExp      of Expresion * Expresion
          | AbsExp     of Reglas
 
+and      Declaracion =
+           ValDecl of Recurrencia * Patron * Expresion
+
 and      Patron =
            ConstPat   of Literal
          | IdPat      of Identificador
@@ -47,8 +50,8 @@ and      Patron =
 withtype Reglas =
            (Patron * Expresion) list
 
-and      Declaracion =
-           Recurrencia * (Patron * Expresion)
+(*and      Declaracion =
+           ValDecl of Recurrencia * (Patron * Expresion)*)
 ;
 
 (* Hay varias cosas en el interprete que no estan implementadas.
