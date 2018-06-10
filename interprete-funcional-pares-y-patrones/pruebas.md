@@ -40,3 +40,24 @@ Pruebas para Intérprete
 - evalDec [] (localDec);
 > val it = [("b", ConstInt 9), ("a", ConstInt 5)] : (string * Valor) list
 ```
+
+## Evaluación de un `RegExp`
+```sml
+- val a = ("the-a", ConstExp(Entera 11));
+- val b = ("the-b", ConstExp(Entera 21));
+- val c = [a, b];
+- val d = RegExp(c);
+- evalProg d;
+> val it = ConstInt 77 : Valor
+> 
+```
+
+## Evaluación de `CondExp`
+```sml
+- val a = IdExp "+";
+- val b = ConstExp(Entera 1);
+- val c = [(a,b)];
+- val d = NONE;
+- val e = CondExp(c, d);
+> val e = CondExp([(IdExp "+", ConstExp(Entera 1))], NONE) : Expresion
+```
