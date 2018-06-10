@@ -10,7 +10,33 @@ Pruebas para Intérprete
 > val it = ConstInt 10 : Valor
 ```
 ```sml
-val unaSuma = LetExp (ValDecl(Recursiva,IdPat "a", ConstExp (Entera 10)), ApExp (IdExp "+", ParExp (IdExp "a",ConstExp (Entera 1))));
+- val unaSuma = LetExp (ValDecl(Recursiva,IdPat "a", ConstExp (Entera 10)), ApExp (IdExp "+", ParExp (IdExp "a",ConstExp (Entera 1))));
 
-evalProg unaSuma;
+- evalProg unaSuma;
+> val it = ConstInt 11 : Valor
+```
+
+## Declaración expresión entera
+```sml
+- val dec = ValDecl(Recursiva,IdPat "a", ConstExp (Entera 9));
+- evalDec [] dec;
+> val it = [("a", ConstInt 9)] : (string * Valor) list
+```
+
+## Evaluación un `AndDecl`
+```sml
+- val dec1 = ValDecl(Recursiva,IdPat "a", ConstExp (Entera 5));
+- val dec2 = ValDecl(Recursiva,IdPat "b", ConstExp (Entera 9));
+- val andDec = AndDecl(dec1, dec2);
+- evalDec [] (andDec);
+> val it = [("b", ConstInt 9), ("a", ConstInt 5)] : (string * Valor) list
+```
+
+## Evaluación de un `LocalDecl`
+```sml
+- val dec1 = ValDecl(Recursiva,IdPat "a", ConstExp (Entera 5));
+- val dec2 = ValDecl(Recursiva,IdPat "b", ConstExp (Entera 9));
+- val localDec = LocalDecl(dec1, dec2);
+- evalDec [] (localDec);
+> val it = [("b", ConstInt 9), ("a", ConstInt 5)] : (string * Valor) list
 ```
