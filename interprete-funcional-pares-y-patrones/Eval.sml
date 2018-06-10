@@ -51,6 +51,8 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
+  | RegExp registros 
+      => ConstInt 77      
 
 and aplicarReglas ambiente reglas valor =
   case reglas of
