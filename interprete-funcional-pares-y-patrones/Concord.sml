@@ -22,7 +22,7 @@ fun concordar (ConstPat (Entera n)) (ConstInt n')
       (* se asocia ident con valor, en ambiente unitario *)
 |   concordar (ParPat (pati,patd)) (Par (vali,vald))
     = (concordar pati vali)
-      <+>                           (* extiende ambiente *)
+      <|>                           (* extiende ambiente *)
       (concordar patd vald)
 |   concordar Comodin _
     = ambienteVacio
@@ -33,3 +33,8 @@ fun concordar (ConstPat (Entera n)) (ConstInt n')
 
 (* Atención: la operación <+> no revisa si hay repetición de
    variables introducidas por pati y patd *)
+
+(* auxiliar: combina dos listas (de mismo tamaño), mediante la aplicación de una función  *)
+fun zipconcat f []      []      = ambienteVacio
+|   zipconcat f (x::xs) (y::ys) = (f x y) <|> (zipconcat f xs ys)
+|   zipconcat f _       _       = raise PatronesNoConcuerdan   

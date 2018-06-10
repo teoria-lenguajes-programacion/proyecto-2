@@ -38,21 +38,6 @@ fun evalExp ambiente exp =
           (*;  val ambientePrima = (ambiente <+> ambLocal) *)
          in evalExp ambientePrima exp
          end
-         
-        
-            
-  (*| LetExp ((NoRecursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> ambLocal) exp
-         end*)
-    (* cuando una declaración local es recursiva, se prepara el
-       ambiente "desenrollándolo" *)
-(*  | LetExp ((Recursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> (desenrollar ambLocal)) exp
-         end*)
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
              and operando  = evalExp ambiente argumento
@@ -83,22 +68,22 @@ and evalDec ambiente dec =
     ValDecl ((NoRecursiva, pat, expLocal))
       => let val valor = evalExp ambiente expLocal 
            ; val ambLocal = concordar pat valor
-        in (ambiente <+> ambLocal)
+        in (ambiente <|> ambLocal)
         end
   | ValDecl ((Recursiva, pat, expLocal))
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
-        in (ambiente <+> (desenrollar ambLocal))
+        in (ambiente <|> (desenrollar ambLocal))
         end
   | AndDecl (dec1, dec2)
        => let val amb1 = evalDec ambiente dec1
               val amb2 = evalDec ambiente dec2
-          in  amb1 <+> amb2 
+          in  amb1 <|> amb2 
           end
   | SecDecl (dec1,dec2)
        => let val amb1 = evalDec ambiente dec1
               val amb2 = evalDec (ambiente <+> amb1) dec2
-          in  amb1 <+> amb2
+          in  amb1 <|> amb2
           end
   | LocalDecl (dec1,dec2)
        => let val amb1 = evalDec ambiente dec1
