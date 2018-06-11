@@ -51,7 +51,7 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
-  | RegExp ((id,expo)::tail) 
+  | RegExp ((id,exp)::tail) 
       => ConstInt 77
   | CondExp ((cond, expresion)::tail, expresionFinal)
       => let val condicion = evalExp ambiente cond
