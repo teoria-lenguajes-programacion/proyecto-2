@@ -51,9 +51,9 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
-  | RegExp registros 
+  | RegExp ((id,exp)::tail) 
       => ConstInt 77
-  | CondExp ([(exp1, exp2)], exp3)
+  | CondExp ((exp1, exp2)::tail, exp3)
       => ConstInt 88      
 
 and aplicarReglas ambiente reglas valor =
