@@ -51,10 +51,19 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
-  | RegExp ((id,exp)::tail) 
+  | RegExp ((id,expo)::tail) 
       => ConstInt 77
-  | CondExp ((exp1, exp2)::tail, exp3)
-      => ConstInt 88      
+  | CondExp ((cond, expresion)::tail, expresionFinal)
+      => let val condicion = evalExp ambiente cond
+         in 
+          case condicion of
+               (ConstBool false) 
+                => CondExp(tail, expresionFinal)
+             | (ConstBool true)  
+                => evalExp ambiente expresion
+             | _                 
+                => evalExp ambiente expresionFinal
+          end   
 
 and aplicarReglas ambiente reglas valor =
   case reglas of
