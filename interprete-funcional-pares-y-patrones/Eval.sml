@@ -35,8 +35,7 @@ fun evalExp ambiente exp =
          end
   | LetExp (dec, exp)
       => let val ambientePrima = evalDec ambiente dec
-          (*;  val ambientePrima = (ambiente <+> ambLocal) *)
-         in evalExp ambientePrima exp
+         in evalExp (ambiente <+> ambientePrima) exp
          end
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
