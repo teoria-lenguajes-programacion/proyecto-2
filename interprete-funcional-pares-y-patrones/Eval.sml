@@ -52,21 +52,24 @@ fun evalExp ambiente exp =
       => Clausura (reglas, ambiente, ambienteVacio)
   | RegExp ((id,exp)::tail) 
       => ConstInt 77
+  | CondExp ([], expresionFinal)
+     => ConstInt 88
   | CondExp ((cond, expresion)::tail, expresionFinal)
       => let val condicion = evalExp ambiente cond
          in 
           case condicion of
                (ConstBool false) 
-                => let val aa = CondExp(tail, expresionFinal)
-                  in evalExp ambiente aa   
-                end
+                => ( evalExp ambiente (CondExp(tail, expresionFinal)))
              | (ConstBool true)  
-                => ConstInt 7
+                => ( evalExp ambiente expresion
+                     ;
+                     print("hola\n")
+                     ;
+                    evalExp ambiente (CondExp(tail, expresionFinal))
+                  )
              | _ 
-                => ConstInt 8
-                (*=> let val opt = getOpt(expresionFinal, ConstExp(Entera 0))
-                in evalExp ambiente opt
-                end*)
+                => (evalExp ambiente (getOpt(expresionFinal, ConstExp(Entera 0))))
+                  
           end   
 
 and aplicarReglas ambiente reglas valor =
@@ -85,12 +88,12 @@ and evalDec ambiente dec =
     ValDecl ((NoRecursiva, pat, expLocal))
       => let val valor = evalExp ambiente expLocal 
            ; val ambLocal = concordar pat valor
-        in (ambiente <|> ambLocal)
+        in ambLocal
         end
   | ValDecl ((Recursiva, pat, expLocal))
       => let val valor    = evalExp ambiente expLocal
            ; val ambLocal = concordar pat valor
-        in (ambiente <|> (desenrollar ambLocal))
+        in (desenrollar ambLocal)
         end
   | AndDecl (dec1, dec2)
        => let val amb1 = evalDec ambiente dec1
