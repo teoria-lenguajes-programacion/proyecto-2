@@ -57,11 +57,16 @@ fun evalExp ambiente exp =
          in 
           case condicion of
                (ConstBool false) 
-                => CondExp(tail, expresionFinal)
+                => let val aa = CondExp(tail, expresionFinal)
+                  in evalExp ambiente aa   
+                end
              | (ConstBool true)  
-                => evalExp ambiente expresion
-             | _                 
-                => evalExp ambiente expresionFinal
+                => ConstInt 7
+             | _ 
+                => ConstInt 8
+                (*=> let val opt = getOpt(expresionFinal, ConstExp(Entera 0))
+                in evalExp ambiente opt
+                end*)
           end   
 
 and aplicarReglas ambiente reglas valor =
