@@ -86,7 +86,7 @@ and evalDec ambiente dec =
   | SecDecl (dec1,dec2)
        => let val amb1 = evalDec ambiente dec1
               val amb2 = evalDec (ambiente <+> amb1) dec2
-          in  amb1 <|> amb2
+          in  amb1 <+> amb2
           end
   | LocalDecl (dec1,dec2)
        => let val amb1 = evalDec ambiente dec1
