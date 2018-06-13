@@ -21,5 +21,3 @@ No implementada
 ## Otras modificaciones hechas al intérprete.
 
 ## Casos de prueba y resultados observados.
-
-## La elegancia de su programación es sujeta a evaluación (se considera parte de la documentación).
