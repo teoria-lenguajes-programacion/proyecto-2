@@ -7,6 +7,7 @@ datatype Valor =
            ConstBool of bool
          | ConstInt  of int
          | Par       of Valor * Valor
+         | Registros of (Identificador * Valor) list
          | Clausura  of
              Reglas           (* patrones y expresiones *)
            * (Valor Ambiente) (* ambiente prevaleciente

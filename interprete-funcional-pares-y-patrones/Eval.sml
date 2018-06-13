@@ -50,8 +50,16 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
-  | RegExp ((id,exp)::tail) 
-      => ConstInt 77
+  | RegExp registros
+      => let fun map_exp exp' = evalExp ambiente exp'
+         in let val lista = map_ambiente map_exp registros
+            in Registros lista
+            end
+         end
+  | CampoExp (exp', ident)
+      => let val Registros lista = evalExp ambiente exp'
+         in  busca ident lista
+         end
   | CondExp ([], expresionFinal)
      => let
         in
