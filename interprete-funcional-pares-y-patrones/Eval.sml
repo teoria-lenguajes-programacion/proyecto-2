@@ -53,23 +53,29 @@ fun evalExp ambiente exp =
   | RegExp ((id,exp)::tail) 
       => ConstInt 77
   | CondExp ([], expresionFinal)
-     => ConstInt 88
+     => let
+        in
+          if isSome(expresionFinal) then 
+            evalExp ambiente (valOf(expresionFinal))
+          else
+            raise NoHayClausulaElse "CondExp: No hay Else"
+        end
   | CondExp ((cond, expresion)::tail, expresionFinal)
       => let val condicion = evalExp ambiente cond
          in 
           case condicion of
                (ConstBool false) 
-                => ( evalExp ambiente (CondExp(tail, expresionFinal)))
-             | (ConstBool true)  
-                => ( evalExp ambiente expresion
-                     ;
-                     print("hola\n")
-                     ;
-                    evalExp ambiente (CondExp(tail, expresionFinal))
+                => (
+                  print("cond: false \n")
+                  ; 
+                  evalExp ambiente (CondExp(tail, expresionFinal))
                   )
-             | _ 
-                => (evalExp ambiente (getOpt(expresionFinal, ConstExp(Entera 0))))
-                  
+             | (ConstBool true)  
+                => (
+                  print("cond: true \n")
+                  ;
+                  evalExp ambiente expresion
+                   )
           end   
 
 and aplicarReglas ambiente reglas valor =
