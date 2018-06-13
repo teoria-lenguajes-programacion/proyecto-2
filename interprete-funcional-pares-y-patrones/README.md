@@ -1,6 +1,6 @@
 Proyecto 2: Intérprete de Pares y Patrones
 ==========================================
-> Willard Zamora 2017239202
+> Willard Zamora 2017239202  
 > Carlos Martín Flores González 2015183528
 
 # Documentación
