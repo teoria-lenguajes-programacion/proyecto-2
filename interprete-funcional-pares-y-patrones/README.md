@@ -7,7 +7,32 @@ Proyecto 2: Intérprete de Pares y Patrones
 
 ## Representacion utilizada para los registros y cualquier otro valor semántico
 
+Se hace uso de un nuevo tipo de valor Registro, el cual se agrega en Val.sml con el objetivo de implementar RexExp y CampoExp
+```sml
+   Registros of (Identificador * Valor) list
+```
+
 ## La solución dada al manejo de registros (expresiones-registro, accesos a campos de un registro)
+
+En RexExp se hace uso del nuevo tipo valor Registros y la función existente de map_ambiente, aplicando a cada par (Identificador, Expresion) la funcion que evalua la expresion y la asocia al identificador.
+
+```sml
+  RegExp registros
+  =>  let fun map_exp exp' = evalExp ambiente exp'
+      in  let val lista = map_ambiente map_exp registros
+          in Registros lista
+          end
+      end
+```
+
+Con respecto a CampoExp simplemente se genera el valor registro a partir de la expresion y en ella se hace busca del identificador pasando como ambiente la lista tipo Registros.
+
+```sml
+  CampoExp (exp', ident)
+  =>  let val Registros lista = evalExp ambiente exp'
+      in  busca ident lista
+      end
+```
 
 ## La solución dada a la evaluación de la expresión iterativa.
 No implementada 
