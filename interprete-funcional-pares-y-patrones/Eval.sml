@@ -73,17 +73,9 @@ fun evalExp ambiente exp =
          in 
           case condicion of
                (ConstBool false) 
-                => (
-                  print("cond: false \n")
-                  ; 
-                  evalExp ambiente (CondExp(tail, expresionFinal))
-                  )
+                => evalExp ambiente (CondExp(tail, expresionFinal))
              | (ConstBool true)  
-                => (
-                  print("cond: true \n")
-                  ;
-                  evalExp ambiente expresion
-                   )
+                => evalExp ambiente expresion
           end   
 
 and aplicarReglas ambiente reglas valor =

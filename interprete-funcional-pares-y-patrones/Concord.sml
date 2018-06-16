@@ -24,6 +24,10 @@ fun concordar (ConstPat (Entera n)) (ConstInt n')
     = (concordar pati vali)
       <|>                           (* extiende ambiente *)
       (concordar patd vald)
+|   concordar (RegPat (id::tail)) (Registros (registros))
+    = id |-> (busca id registros) <|> concordar (RegPat (tail)) (Registros (registros))
+|   concordar (RegPat []) (Registros (registros))
+    = ambienteVacio
 |   concordar Comodin _
     = ambienteVacio
       (* comodín concuerda con todo, no produce asociaciones *)
