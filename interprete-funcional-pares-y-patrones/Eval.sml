@@ -60,13 +60,16 @@ fun evalExp ambiente exp =
       => let val Registros lista = evalExp ambiente exp'
          in  busca ident lista
          end
+  | IterExp (((identificador, iniExp, actExp)::tail), condicion, exp')
+      => raise NoEsUnaFuncion ("nada")
   | CondExp ([], expresionFinal)
      => let
         in
-          if isSome(expresionFinal) then 
-            evalExp ambiente (valOf(expresionFinal))
-          else
-            raise NoHayClausulaElse "CondExp: No hay Else"
+          (* pongo *)
+          case expresionFinal of
+            (Something expFinal) => evalExp ambiente expFinal
+          | Nothing  => raise NoHayClausulaElse "CondExp: No hay Else"
+          (* fin pongo *)
         end
   | CondExp ((cond, expresion)::tail, expresionFinal)
       => let val condicion = evalExp ambiente cond

@@ -9,7 +9,11 @@ use "concord.sml"; (* concordancia de patrones *)
 use "opers.sml";   (* operaciones predefinidas del minilenguaje *)
 use "eval.sml";    (* el evaluador *)
 
-val iterExp = IterExp([( "n", ConstExp(Entera 1), ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))], ApExp(IdExp ">",ParExp(IdExp "n", ConstExp(Entera 10))), IdExp "n")
-(*val iter3 = LetExp(ValDecl(NoRecursiva, IdPat "n", ConstExp(Entera 1)), iterExp)*)
-
-evalProg iterExp;
+val iter3 = LetExp(ValDecl(NoRecursiva, IdPat "n", ConstExp(Entera 1)),                              
+                   IterExp([(
+                             "n", ConstExp(Entera 1), ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))                    
+                           ],
+                           ApExp(IdExp ">",ParExp(IdExp "n", ConstExp(Entera 10))),
+                           IdExp "n"
+                          ));
+evalProg iter3;

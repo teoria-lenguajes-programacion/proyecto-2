@@ -1,5 +1,9 @@
 (* Lenguaje funcional con pares y patrones *)
 
+
+datatype 'a option = Nothing
+          | Something of 'a
+
 (* Identificadores, variables, etc.
    Los identificadores son representados mediante hileras. *)
 
