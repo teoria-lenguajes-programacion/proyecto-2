@@ -47,7 +47,6 @@ fun map_ambiente f []
 |   map_ambiente f ((ident,valor)::amb)
     = (ident,(f valor))::(map_ambiente f amb)
 
-
 (* combinación de ambientes disyuntos *)
 exception DominiosNoDisyuntos
 
@@ -57,6 +56,26 @@ fun existe ident []
     = if ident = ident' 
       then true
       else existe ident ambiente
+
+fun existeEnLista ident []
+    = false
+|   existeEnLista ident ((ident',_,_)::ambiente)
+    = if ident = ident' 
+      then true
+      else existeEnLista ident ambiente
+
+fun ini_ambiente f [] ambiente
+    = []
+|   ini_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+    = if existeEnLista ident cola then
+        raise DominiosNoDisyuntos
+      else
+        (ident,(f ambiente expIni))::(ini_ambiente f cola ambiente)
+
+fun act_ambiente f [] ambiente
+    = []
+|   act_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+    = (ident,(f ambiente expAct))::(act_ambiente f cola ambiente)
 
 (* recorre un ambiente, buscando en el otro.  Si encuentra, hay error *)
 
