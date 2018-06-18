@@ -57,17 +57,17 @@ fun existe ident []
       then true
       else existe ident ambiente
 
-fun existeEnLista ident []
+fun existe_en_lista ident []
     = false
-|   existeEnLista ident ((ident',_,_)::ambiente)
+|   existe_en_lista ident ((ident',_,_)::ambiente)
     = if ident = ident' 
       then true
-      else existeEnLista ident ambiente
+      else existe_en_lista ident ambiente
 
 fun ini_ambiente f [] ambiente
     = []
 |   ini_ambiente f ((ident, expIni, expAct)::cola) ambiente    
-    = if existeEnLista ident cola then
+    = if existe_en_lista ident cola then
         raise DominiosNoDisyuntos
       else
         (ident,(f ambiente expIni))::(ini_ambiente f cola ambiente)

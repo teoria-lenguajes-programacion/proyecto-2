@@ -62,15 +62,19 @@ fun evalExp ambiente exp =
          end
   | IterExp (lista, condicionExp, trueExp)
       => let fun modificar ambiente' exp' = evalExp ambiente' exp'
-         in let val ambiente' = ini_ambiente modificar lista ambiente
-            in let fun ciclo amb lista' condicionExp' trueExp'
-              = case (evalExp (ambiente <+> amb) condicionExp') of
-              (ConstBool false) 
-              => ciclo (act_ambiente modificar lista' (ambiente <+> amb)) lista' condicionExp trueExp
-              | (ConstBool true)  
-              => evalExp (ambiente <+> amb) trueExp'
-              in ciclo ambiente' lista condicionExp trueExp
-              end
+         in let val listaAmb = ini_ambiente modificar lista ambiente
+            in let fun ciclo listaAmb' 
+                = let 
+                  val iterAmb = (ambiente <+> listaAmb')
+                in
+                  case (evalExp iterAmb condicionExp) of
+                  (ConstBool false) 
+                  => ciclo (act_ambiente modificar lista iterAmb)
+                  | (ConstBool true)  
+                  => evalExp iterAmb trueExp
+                end
+                in ciclo listaAmb
+                end
             end
          end
   | CondExp ([], expresionFinal)
