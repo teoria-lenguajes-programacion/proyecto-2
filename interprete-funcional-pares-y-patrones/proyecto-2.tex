@@ -88,7 +88,7 @@ colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
 \section{Estrategia de solución}
 Se empezó el desarrollo del proyecto por medio de la exploración del código proporcionado por el profesor. Se ejecutaron pruebas sobre el mismo con el fin de entender cómo funcionaba y las partes del código que se ejercitaban luego de cada invocación.
 
-\paragraph{}Una vez que se tuvo un mejor conocimiento del funcionamiento se estudió el código del intéprete imperativo para incluir el manejo de las declaraciones en este proyecto. Este fue el primer logro. Luego de se empezaron a estudiar los casos de las expresiones \texttt{RegExp} y \texttt{CampoExp} pero en principio no se logró con una solución por lo que se decidió continuar con \texttt{CondExp}. Al estudiar cómo funcionaba el `cond` de Scheme se logró adaptar en relativamente poco tiempo el código que se venia desarrollando para dicha expresión.
+\paragraph{}Una vez que se tuvo un mejor conocimiento del funcionamiento se estudió el código del intéprete imperativo para incluir el manejo de las declaraciones en este proyecto. Este fue el primer logro. Luego de se empezaron a estudiar los casos de las expresiones \texttt{RegExp} y \texttt{CampoExp} pero en principio no se logró con una solución por lo que se decidió continuar con \texttt{CondExp}. Al estudiar cómo funcionaba el \texttt{cond} de Scheme se logró adaptar en relativamente poco tiempo el código que se venia desarrollando para dicha expresión.
 
 Luego de la experiencia anterior, se podría decir que ya se estaba ``entrando en calor'' con el código SML y gracias a esto se fue desarrollando, probando y puliendo el código para las expresiones \texttt{RegExp} y \texttt{CampoExp}. 
 
@@ -101,7 +101,7 @@ El proceso de desarrollo en general se dio a partir de discusión, desarrollo, p
 \subsection{Martín Flores}
 Esta fue mi primera experiencia con Standar ML. A pesar que ya tenía experiencia en otros lenguajes de programción funcionales, este al ser nuevo siempre presenta retos y más cuando hay que cumplir con alguna entrega. Durante el desarrollo del proyecto, navegué por varios sitios Web y pude comprobar que este es un lenguaje que goza de mucha aceptación dentro de las universidades principalemente en cursos de teoría de lenguajes de programación o bien para introducir conceptos de programación funcional.
 
-En principio, aunque puede resultar algo diferente, conforme uno se va adentrando pude notar que es un lenguaje en el que se pueden lograr mucha expresividad, el concepto del `datatype` me parece muy para la definición de tipos a un "bajo costo" en términos de codificación. 
+En principio, aunque puede resultar algo diferente, conforme uno se va adentrando pude notar que es un lenguaje en el que se pueden lograr mucha expresividad, el concepto del \texttt{datatype} me parece muy para la definición de tipos a un ``bajo costo'' en términos de codificación. 
 
 No se pudo encontrar buenas herramientas de \emph{tooling} para desarrollar en SML. El \emph{plugin} de Sublime Text ayuda pero es limitado. El intérprete de \emph{Moscow ML} también es limitado a la hora de introducir código.
 
@@ -251,6 +251,7 @@ fun act_ambiente f [] ambiente
 |   act_ambiente f ((ident, expIni, expAct)::cola) ambiente    
 \end{verbatim}
 
+\pagebreak
 \subsection{Casos de prueba y resultados observados}
 
 Las siguientes pruebas fueron tomadas del archivo \texttt{PruebasFun.sml}.
