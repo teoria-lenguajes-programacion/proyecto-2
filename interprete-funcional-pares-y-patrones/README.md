@@ -65,7 +65,7 @@ Para esta evaluación se crearon dos condiciones:
 1. Cuando se pasa una lista vacía y una expresión final (caso base)
 2. Cuando se pasa una lista de la forma `Condicion * Expresion` y una expresión final
 
-Cuando se da el caso **1**, se verifica primero si la `expresionFinal` es de tipo `option`. Si es así, entonces se evalúa la expresión con `evalExp` pasando como argumentos el `ambiente` y el valor que viene dentro de la expresión opcional utilizando la función `valOf`. Si la expresión final no se encuentra se lanza una excepción.
+Cuando se da el caso **1**, se verifica primero si la `expresionFinal` es de alguno de los tipos opcionales definidos (`Something` o `Nothing`). En el caso que `expresionFinal` sea de tipo `Something`, quiere decir que la expresión si contiene una expresión final que puede ser evaluada. Para evaluar esta expresión se usa `evalExp`. En el caso que no se incluya una `expresionFinal` se lanza una excepción.
 
 Cuando se pasa una lista de la forma `Condicion * Expresion`, primero se evalúa la condición (`cond`) y en el caso que el resultado sea verdadero (`ConstBool true`) se procede entonces a evaluar la expresion (`expresion`). Si el resultado de la evaluación de `cond` sea falso (`ConstBool false`) entonces se evalúa la expresión pero esta vez pasando como argumento el resultado de evaluar el resto de la lista (`tail`) con la expresión final. De esta forma se va a ir consumiento la lista de forma recursiva y probando cada uno de los pares `Condicion * Expresion`.
 
@@ -142,6 +142,8 @@ fun act_ambiente f [] ambiente
 
 ## Casos de prueba y resultados observados.
 
+Las siguientes pruebas fueron tomadas del archivo `PruebasFun.sml`. 
+
 ### Registros
 
 ```sml
@@ -174,8 +176,7 @@ fun act_ambiente f [] ambiente
 ! NoEstaEnElDominio  "c"
 
 
-(* ValDecl *)
-- val pruFun = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+- val pruFun = LetExp( ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
                      regFun);
 > val pruFun =
     LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
@@ -188,6 +189,7 @@ fun act_ambiente f [] ambiente
 
 
 (* Acceso a campos donde el registro es el resultado de una expresion *)
+
 - val regA1 = CampoExp(pruFun, "a");
 > val regA1 =
     CampoExp(LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
@@ -200,6 +202,7 @@ fun act_ambiente f [] ambiente
   Expresion
 - evalProg regA1;
 > val it = ConstInt 1 : Valor
+
 - val regC1 = CampoExp(pruFun, "c");
 > val regC1 =
     CampoExp(LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
@@ -213,15 +216,129 @@ fun act_ambiente f [] ambiente
 - evalProg regC1;
 ! Uncaught exception:
 ! NoEstaEnElDominio  "c"
-- 
+```
 
-(* Una Suma *)
-- val unaSuma = LetExp (ValDecl(NoRecursiva,IdPat "a", ConstExp (Entera 9)), ApExp (IdExp "+", ParExp (IdExp "a",ConstExp (Entera 1))));
+#### Iteración
+```sml
+(* Iteración exitosa *)
+- val iter1 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 6)),
+               LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                 AbsExp [(IdPat "k",
+                    IterExp([
+                       ("n", IdExp "k", ApExp(IdExp "-", ParExp(IdExp "n", ConstExp(Entera 1))))
+                    ,  ("product", ConstExp(Entera 1), ApExp(IdExp "*", ParExp(IdExp "product", IdExp "n")))
+                    ],
+                    ApExp(IdExp "=",ParExp(IdExp "n", ConstExp(Entera 0))),
+                    IdExp "product"))
+                 ])
+               , ApExp(IdExp "fact", IdExp "a")));
+> val iter1 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 6)),
+           LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                          AbsExp [(IdPat "k",
+                                   IterExp([("n", IdExp "k",
+                                             ApExp(IdExp "-",
+                                                   ParExp(IdExp "n",
+                                                          ConstExp(Entera 1)))),
+                                            ("product", ConstExp(Entera 1),
+                                             ApExp(IdExp "*",
+                                                   ParExp(IdExp "product",
+                                                          IdExp "n")))],
+                                           ApExp(IdExp "=",
+                                                 ParExp(IdExp "n",
+                                                        ConstExp(Entera 0))),
+                                           IdExp "product"))]),
+                  ApExp(IdExp "fact", IdExp "a"))) : Expresion
+- evalProg iter1;
+> val it = ConstInt 720 : Valor
 
-- evalProg unaSuma;
-> val it = ConstInt 10 : Valor
+(* Iteracion no exitosa, variable de iteracion repetida *)
+- val iter2 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 6)),
+               LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                 AbsExp [(IdPat "k",
+                    IterExp([(
+                       "n", IdExp "k", ApExp(IdExp "-", ParExp(IdExp "n", ConstExp(Entera 1))))
+                    ,  ("n", ConstExp(Entera 1), ApExp(IdExp "*", ParExp(IdExp "n", IdExp "n")))
+                    ],
+                    ApExp(IdExp "=",ParExp(IdExp "n", ConstExp(Entera 0))),
+                    IdExp "n"))
+                 ])
+               , ApExp(IdExp "fact", IdExp "a")));
+> val iter2 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 6)),
+           LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                          AbsExp [(IdPat "k",
+                                   IterExp([("n", IdExp "k",
+                                             ApExp(IdExp "-",
+                                                   ParExp(IdExp "n",
+                                                          ConstExp(Entera 1)))),
+                                            ("n", ConstExp(Entera 1),
+                                             ApExp(IdExp "*",
+                                                   ParExp(IdExp "n",
+                                                          IdExp "n")))],
+                                           ApExp(IdExp "=",
+                                                 ParExp(IdExp "n",
+                                                        ConstExp(Entera 0))),
+                                           IdExp "n"))]),
+                  ApExp(IdExp "fact", IdExp "a"))) : Expresion
+- evalProg iter2;
+! Uncaught exception:
+! DominiosNoDisyuntos
+
+(* Iteracion para que devuelva el n mas recientemente definido *)
+- val iter3 = LetExp(ValDecl(NoRecursiva, IdPat "n", ConstExp(Entera 1)),                              
+                   IterExp([(
+                             "n", ConstExp(Entera 1), ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))                    
+                           ],
+                           ApExp(IdExp ">",ParExp(IdExp "n", ConstExp(Entera 10))),
+                           IdExp "n"
+                          ));
+> val iter3 =
+    LetExp(ValDecl(NoRecursiva, IdPat "n", ConstExp(Entera 1)),
+           IterExp([("n", ConstExp(Entera 1),
+                     ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))],
+                   ApExp(IdExp ">", ParExp(IdExp "n", ConstExp(Entera 10))),
+                   IdExp "n")) : Expresion
+- evalProg iter3;
+> val it = ConstInt 11 : Valor
+
+(* Iteracion para que devuelva error de no reconocer a n, en la inicializacion de m *)
+- val iter4 = IterExp([(
+                      "n", ConstExp(Entera 1), ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))
+                   ,  ("m", IdExp "n", ApExp(IdExp "+", ParExp(IdExp "n", IdExp "m")))
+                    ],
+                    ApExp(IdExp ">",ParExp(IdExp "n", ConstExp(Entera 10))),
+                    IdExp "n");
+> val iter4 =
+    IterExp([("n", ConstExp(Entera 1),
+              ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1)))),
+             ("m", IdExp "n", ApExp(IdExp "+", ParExp(IdExp "n", IdExp "m")))],
+            ApExp(IdExp ">", ParExp(IdExp "n", ConstExp(Entera 10))),
+            IdExp "n") : Expresion
+- evalProg iter4;
+! Uncaught exception:
+! NoEstaEnElDominio  "n"
 
 
+(* Iteracion que devuelve un registro *)
+- val iter5 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 3)),
+                   IterExp([(
+                             "n", ConstExp(Entera 1), ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))
+                           ],
+                           ApExp(IdExp ">", ParExp(IdExp "n", ConstExp(Entera 10))),
+                           RegExp[("a", IdExp "a"), ("n", IdExp "n")]
+                          ));
+> val iter5 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 3)),
+           IterExp([("n", ConstExp(Entera 1),
+                     ApExp(IdExp "+", ParExp(IdExp "n", ConstExp(Entera 1))))],
+                   ApExp(IdExp ">", ParExp(IdExp "n", ConstExp(Entera 10))),
+                   RegExp [("a", IdExp "a"), ("n", IdExp "n")])) : Expresion
+- evalProg iter5;
+> val it = Registros [("a", ConstInt 3), ("n", ConstInt 11)] : Valor
+```
+### Expresión condicional `CondExp`
+```sml
 (* Condicional exitoso *)
 - val cond1 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
                    CondExp([
@@ -239,8 +356,6 @@ fun act_ambiente f [] ambiente
                      ConstExp(Entera 2))], Nothing)) : Expresion
 - evalProg cond1;
 > val it = ConstInt 1 : Valor
-
-
 
 (* Condicional exitoso, se evalua que se ejecute la primera que encuentra *)
 - val cond2 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
@@ -261,10 +376,8 @@ fun act_ambiente f [] ambiente
                      ConstExp(Entera 2)),
                     (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
                      ConstExp(Entera 3))], Nothing)) : Expresion
-
 - evalProg cond2;
 > val it = ConstInt 1 : Valor
-
 
 (* Se evalua la ejecucion del else *)
 - val cond3 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 3)),
@@ -303,6 +416,319 @@ fun act_ambiente f [] ambiente
 - evalProg cond4;
 ! Uncaught exception:
 ! NoHayClausulaElse  "CondExp: No hay Else"
+```
+
+### Concordancia de patrones
+
+
+### Expresión `ComoPat`
+```sml
 
 ```
 
+### Declaraciones colaterales, secuenciales y locales
+```sml
+- val val1 = ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1));
+> val val1 = ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)) : Declaracion
+- val val2 = ValDecl(NoRecursiva, IdPat "b", ConstExp(Entera 2));
+> val val2 = ValDecl(NoRecursiva, IdPat "b", ConstExp(Entera 2)) : Declaracion
+- val val3 = ValDecl(NoRecursiva, IdPat "c", ApExp(IdExp "+", ParExp(IdExp "a", ConstExp(Entera 2))));
+> val val3 =
+    ValDecl(NoRecursiva, IdPat "c",
+            ApExp(IdExp "+", ParExp(IdExp "a", ConstExp(Entera 2)))) :
+  Declaracion
+- val val4 = ValDecl(NoRecursiva, IdPat "d", ApExp(IdExp "+", ParExp(IdExp "f", ConstExp(Entera 3))));
+> val val4 =
+    ValDecl(NoRecursiva, IdPat "d",
+            ApExp(IdExp "+", ParExp(IdExp "f", ConstExp(Entera 3)))) : Declaracion
+
+(***** Declaraciones colaterales *****)
+
+(* Declaracion colateral exitosa *)
+- val colat1 = LetExp(AndDecl(val1, val2), 
+                    ApExp(IdExp "+", ParExp(IdExp "a", IdExp "b")));
+> val colat1 =
+    LetExp(AndDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "b", ConstExp(Entera 2))),
+           ApExp(IdExp "+", ParExp(IdExp "a", IdExp "b"))) : Expresion
+- evalProg colat1;
+> val it = ConstInt 3 : Valor
+
+(* Declaracion colateral exitosa  *)
+- val colat2 = LetExp(AndDecl(val1, val2), 
+                    IdExp "a");
+> val colat2 =
+    LetExp(AndDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "b", ConstExp(Entera 2))),
+           IdExp "a") : Expresion
+- evalProg colat2;
+> val it = ConstInt 1 : Valor
+
+(* Declaracion colateral no exitosa  *)
+- val colat3 = LetExp(AndDecl(val1, val3), 
+                    IdExp "c");
+> val colat3 =
+    LetExp(AndDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "c",
+                           ApExp(IdExp "+",
+                                 ParExp(IdExp "a", ConstExp(Entera 2))))),
+           IdExp "c") : Expresion
+- evalProg colat3;
+! Uncaught exception:
+! NoEstaEnElDominio  "a"
+
+(* Declaracion colateral no exitosa  *)
+- val colat4 = LetExp(AndDecl(val1, val1), 
+                    IdExp "a");
+> val colat4 =
+    LetExp(AndDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1))),
+           IdExp "a") : Expresion
+- evalProg colat4;
+! Uncaught exception:
+! DominiosNoDisyuntos
+
+(****** Declaraciones secuenciales *****)
+
+(* Declaracion secuencial exitosa *)
+- val sec1 = LetExp(SecDecl(val1, val2), 
+                  ApExp(IdExp "+", ParExp(IdExp "a", IdExp "b")));
+> val sec1 =
+    LetExp(SecDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "b", ConstExp(Entera 2))),
+           ApExp(IdExp "+", ParExp(IdExp "a", IdExp "b"))) : Expresion
+- evalProg sec1;
+> val it = ConstInt 3 : Valor
+
+(* Declaracion secuencial exitosa *)
+- val sec2 = LetExp(SecDecl(val1, val3), 
+                  IdExp "c");
+> val sec2 =
+    LetExp(SecDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   ValDecl(NoRecursiva, IdPat "c",
+                           ApExp(IdExp "+",
+                                 ParExp(IdExp "a", ConstExp(Entera 2))))),
+           IdExp "c") : Expresion
+- evalProg sec2;
+> val it = ConstInt 3 : Valor            
+
+
+(***** Declaraciones locales *****)
+
+(* Declaracion local exitosa *)
+- val loc1 = LetExp(LocalDecl(val1, val3),
+                  IdExp "c");
+> val loc1 =
+    LetExp(LocalDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                     ValDecl(NoRecursiva, IdPat "c",
+                             ApExp(IdExp "+",
+                                   ParExp(IdExp "a", ConstExp(Entera 2))))),
+           IdExp "c") : Expresion
+
+(* Declaracion local no exitosa *)
+- val loc2 = LetExp(LocalDecl(val1, val4),
+                  IdExp "d");
+> val loc2 =
+    LetExp(LocalDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                     ValDecl(NoRecursiva, IdPat "d",
+                             ApExp(IdExp "+",
+                                   ParExp(IdExp "f", ConstExp(Entera 3))))),
+           IdExp "d") : Expresion
+- evalProg loc2;
+! Uncaught exception:
+! NoEstaEnElDominio  "f"
+
+(* Declaracion local no exitosa *)
+- val loc3 = LetExp(LocalDecl(val1, val3),
+                  IdExp "a");
+> val loc3 =
+    LetExp(LocalDecl(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                     ValDecl(NoRecursiva, IdPat "c",
+                             ApExp(IdExp "+",
+                                   ParExp(IdExp "a", ConstExp(Entera 2))))),
+           IdExp "a") : Expresion
+- evalProg loc3;
+! Uncaught exception:
+! NoEstaEnElDominio  "a"
+```
+
+### Declaraciones Recursivas
+```sml
+(* Factorial recursivo exitoso *)
+- val fact1 = LetExp(ValDecl(Recursiva, IdPat "fact",
+                    AbsExp[(IdPat "f",
+                        CondExp([
+                                 (ApExp(IdExp "=", ParExp(IdExp "f", ConstExp(Entera 0))),
+                                   ConstExp(Entera 1)),
+                                 (ApExp(IdExp "=", ParExp(IdExp "f", ConstExp(Entera 1))),
+                                   ConstExp(Entera 1))
+                                ],
+                                Something
+                                 (ApExp(IdExp "*", ParExp(IdExp "f", ApExp(IdExp "fact",
+                                                                           ApExp(IdExp "-", ParExp(IdExp "f", ConstExp(Entera 1))))
+                                                         )))
+
+                                  ))
+                            ]),
+                  ApExp(IdExp "fact", ConstExp(Entera 5)));
+> val fact1 =
+    LetExp(ValDecl(Recursiva, IdPat "fact",
+                   AbsExp [(IdPat "f",
+                            CondExp([(ApExp(IdExp "=",
+                                            ParExp(IdExp "f",
+                                                   ConstExp(Entera 0))),
+                                      ConstExp(Entera 1)),
+                                     (ApExp(IdExp "=",
+                                            ParExp(IdExp "f",
+                                                   ConstExp(Entera 1))),
+                                      ConstExp(Entera 1))],
+                                    Something(ApExp(IdExp "*",
+                                                    ParExp(IdExp "f",
+                                                           ApExp(IdExp "fact",
+                                                                 ApExp(IdExp "-",
+                                                                       ParExp(#,
+                                                                              #))))))))]),
+           ApExp(IdExp "fact", ConstExp(Entera 5))) : Expresion
+- evalProg fact1;
+> val it = ConstInt 120 : Valor
+
+(* Factorial recursivo no exitoso *)
+- val fact2 = LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                    AbsExp[(IdPat "f",
+                        CondExp([
+                                 (ApExp(IdExp "=", ParExp(IdExp "f", ConstExp(Entera 0))),
+                                   ConstExp(Entera 1)),
+                                 (ApExp(IdExp "=", ParExp(IdExp "f", ConstExp(Entera 1))),
+                                   ConstExp(Entera 1))
+                                ],
+                                Something
+                                 (ApExp(IdExp "*", ParExp(IdExp "f", ApExp(IdExp "fact",
+                                                                           ApExp(IdExp "-", ParExp(IdExp "f", ConstExp(Entera 1))))
+                                                         )))
+
+                                  ))
+                            ]),
+                  ApExp(IdExp "fact", ConstExp(Entera 5)));
+> val fact2 =
+    LetExp(ValDecl(NoRecursiva, IdPat "fact",
+                   AbsExp [(IdPat "f",
+                            CondExp([(ApExp(IdExp "=",
+                                            ParExp(IdExp "f",
+                                                   ConstExp(Entera 0))),
+                                      ConstExp(Entera 1)),
+                                     (ApExp(IdExp "=",
+                                            ParExp(IdExp "f",
+                                                   ConstExp(Entera 1))),
+                                      ConstExp(Entera 1))],
+                                    Something(ApExp(IdExp "*",
+                                                    ParExp(IdExp "f",
+                                                           ApExp(IdExp "fact",
+                                                                 ApExp(IdExp "-",
+                                                                       ParExp(#,
+                                                                              #))))))))]),
+           ApExp(IdExp "fact", ConstExp(Entera 5))) : Expresion
+- evalProg fact2;
+! Uncaught exception:
+! NoEstaEnElDominio  "fact"
+
+(* Funciones mutuamente recursivas exitosas *)
+- val mut1 = LetExp(ValDecl(Recursiva, ParPat(IdPat "f", IdPat "g"),
+                   (ParExp(
+                    AbsExp[(IdPat "x",
+                            ApExp(IdExp "+", ParExp(ConstExp(Entera 1),
+                                                    ApExp(IdExp "g",
+                                                          ApExp(IdExp "-", ParExp(IdExp "x",
+                                                                                  ConstExp(Entera 1)))))
+                           ))],
+                    AbsExp[(IdPat "y",
+                            IfExp( ApExp(IdExp "<", ParExp(IdExp "y",
+                                                                 ConstExp(Entera 0))),
+                                         IdExp "y",
+                                         ApExp(IdExp "+", ParExp(ConstExp(Entera 1),
+                                                                 ApExp(IdExp "f",
+                                                                       ApExp(IdExp "-",Par",
+                                                                                              ConstExp(Entera 1)
+                                                                                             )
+                                                                            )
+                                                                      )
+                                                                )
+                                              )                                         
+                                       )
+                                
+                            )]
+                  ))),
+                  ApExp(IdExp "f", ConstExp(Entera 10)));
+> val mut1 =
+    LetExp(ValDecl(Recursiva, ParPat(IdPat "f", IdPat "g"),
+                   ParExp(AbsExp [(IdPat "x",
+                                   ApExp(IdExp "+",
+                                         ParExp(ConstExp(Entera 1),
+                                                ApExp(IdExp "g",
+                                                      ApExp(IdExp "-",
+                                                            ParExp(IdExp "x",
+                                                                   ConstExp#))))))],
+                          AbsExp [(IdPat "y",
+                                   IfExp(ApExp(IdExp "<",
+                                               ParExp(IdExp "y",
+                                                      ConstExp(Entera 0))),
+                                         IdExp "y",
+                                         ApExp(IdExp "+",
+                                               ParExp(ConstExp(Entera 1),
+                                                      ApExp(IdExp "f",
+                                                            ApExp(IdExp "-",
+                                                                  ParExp#))))))])),
+           ApExp(IdExp "f", ConstExp(Entera 10))) : Expresion
+- evalProg mut1;
+> val it = ConstInt 10 : Valor
+
+(* Funciones mutuamente recursivas no exitosas *)
+- val mut2 = LetExp(ValDecl(NoRecursiva, ParPat(IdPat "f", IdPat "g"),
+                   (ParExp(
+                    AbsExp[(IdPat "x",
+                            ApExp(IdExp "+", ParExp(ConstExp(Entera 1),
+                                                    ApExp(IdExp "g",
+                                                          ApExp(IdExp "-", ParExp(IdExp "x",
+                                                                                  ConstExp(Entera 1)))))
+                           ))],
+                    AbsExp[(IdPat "y",
+                            IfExp( ApExp(IdExp "<", ParExp(IdExp "y",
+                                                                 ConstExp(Entera 0))),
+                                         IdExp "y",
+                                         ApExp(IdExp "+", ParExp(ConstExp(Entera 1),
+                                                                 ApExp(IdExp "f",
+                                                                       ApExp(IdExp "-",P"y",
+                                                                                              ConstExp(Entera 1)
+                                                                                             )
+                                                                            )
+                                                                      )
+                                                                )
+                                              )                                         
+                                       )
+                                
+                            )]
+                  ))),
+                  ApExp(IdExp "f", ConstExp(Entera 10)));
+> val mut2 =
+    LetExp(ValDecl(NoRecursiva, ParPat(IdPat "f", IdPat "g"),
+                   ParExp(AbsExp [(IdPat "x",
+                                   ApExp(IdExp "+",
+                                         ParExp(ConstExp(Entera 1),
+                                                ApExp(IdExp "g",
+                                                      ApExp(IdExp "-",
+                                                            ParExp(IdExp "x",
+                                                                   ConstExp#))))))],
+                          AbsExp [(IdPat "y",
+                                   IfExp(ApExp(IdExp "<",
+                                               ParExp(IdExp "y",
+                                                      ConstExp(Entera 0))),
+                                         IdExp "y",
+                                         ApExp(IdExp "+",
+                                               ParExp(ConstExp(Entera 1),
+                                                      ApExp(IdExp "f",
+                                                            ApExp(IdExp "-",
+                                                                  ParExp#))))))])),
+           ApExp(IdExp "f", ConstExp(Entera 10))) : Expresion
+- evalProg mut2;
+! Uncaught exception:
+! NoEstaEnElDominio  "g"
+```
