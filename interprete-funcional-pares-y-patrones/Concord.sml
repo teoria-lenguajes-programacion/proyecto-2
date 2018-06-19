@@ -17,6 +17,10 @@ fun concordar (ConstPat (Entera n)) (ConstInt n')
         (* literales concuerdan, no se producen asociaciones *)
       else
         raise PatronesNoConcuerdan
+|   concordar (ComoPat (ident, pat)) valor
+    = (concordar pat valor)
+      <|>                           (* extiende ambiente *)
+      (ident |-> valor)
 |   concordar (IdPat ident) valor
     = ident |-> valor
       (* se asocia ident con valor, en ambiente unitario *)
