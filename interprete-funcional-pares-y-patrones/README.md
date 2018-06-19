@@ -94,3 +94,168 @@ Esta solución fue proporcionada por el profesor.
 No se hicieron otras modificaciones
 
 ## Casos de prueba y resultados observados.
+
+### Registros
+
+```sml
+- val registro1 = RegExp [("a", ConstExp(Entera 1)),
+                        ("b", ConstExp(Entera 2))];
+> val registro1 = RegExp [("a", ConstExp(Entera 1)), ("b", ConstExp(Entera 2))]
+     : Expresion
+
+(* Campos repetidos *)     
+- val registro2 = RegExp [("x", ConstExp(Entera 3)),
+                        ("x", ConstExp(Entera 4))];
+> val registro2 = RegExp [("x", ConstExp(Entera 3)), ("x", ConstExp(Entera 4))]
+     : Expresion
+
+(* Campo existente *)
+- val regA  = CampoExp(registro1, "a");
+> val regA =
+    CampoExp(RegExp [("a", ConstExp(Entera 1)), ("b", ConstExp(Entera 2))],
+             "a") : Expresion
+- evalProg regA;
+> val it = ConstInt 1 : Valor
+
+(* Campo inexistente *)
+- val regC  = CampoExp(registro1, "c");
+> val regC =
+    CampoExp(RegExp [("a", ConstExp(Entera 1)), ("b", ConstExp(Entera 2))],
+             "c") : Expresion
+- evalProg regC;
+! Uncaught exception:
+! NoEstaEnElDominio  "c"
+
+
+(* ValDecl *)
+- val pruFun = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                     regFun);
+> val pruFun =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+           IfExp(ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                 RegExp [("a", ConstExp(Entera 1)), ("b", ConstExp(Entera 2))],
+                 RegExp [("x", ConstExp(Entera 3)),
+                         ("x", ConstExp(Entera 4))])) : Expresion
+- evalProg pruFun;
+> val it = Registros [("a", ConstInt 1), ("b", ConstInt 2)] : Valor
+
+
+(* Acceso a campos donde el registro es el resultado de una expresion *)
+- val regA1 = CampoExp(pruFun, "a");
+> val regA1 =
+    CampoExp(LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                    IfExp(ApExp(IdExp "=",
+                                ParExp(IdExp "a", ConstExp(Entera 1))),
+                          RegExp [("a", ConstExp(Entera 1)),
+                                  ("b", ConstExp(Entera 2))],
+                          RegExp [("x", ConstExp(Entera 3)),
+                                  ("x", ConstExp(Entera 4))])), "a") :
+  Expresion
+- evalProg regA1;
+> val it = ConstInt 1 : Valor
+- val regC1 = CampoExp(pruFun, "c");
+> val regC1 =
+    CampoExp(LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                    IfExp(ApExp(IdExp "=",
+                                ParExp(IdExp "a", ConstExp(Entera 1))),
+                          RegExp [("a", ConstExp(Entera 1)),
+                                  ("b", ConstExp(Entera 2))],
+                          RegExp [("x", ConstExp(Entera 3)),
+                                  ("x", ConstExp(Entera 4))])), "c") :
+  Expresion
+- evalProg regC1;
+! Uncaught exception:
+! NoEstaEnElDominio  "c"
+- 
+
+(* Una Suma *)
+- val unaSuma = LetExp (ValDecl(NoRecursiva,IdPat "a", ConstExp (Entera 9)), ApExp (IdExp "+", ParExp (IdExp "a",ConstExp (Entera 1))));
+
+- evalProg unaSuma;
+> val it = ConstInt 10 : Valor
+
+
+(* Condicional exitoso *)
+- val cond1 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   CondExp([
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                               ConstExp(Entera 1)),
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                               ConstExp(Entera 2))
+                           ],
+                           Nothing));
+> val cond1 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+           CondExp([(ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                     ConstExp(Entera 1)),
+                    (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                     ConstExp(Entera 2))], Nothing)) : Expresion
+- evalProg cond1;
+> val it = ConstInt 1 : Valor
+
+
+
+(* Condicional exitoso, se evalua que se ejecute la primera que encuentra *)
+- val cond2 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+                   CondExp([
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                               ConstExp(Entera 1)),
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                               ConstExp(Entera 2)),
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                               ConstExp(Entera 3))                            
+                           ],
+                           Nothing));
+> val cond2 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 1)),
+           CondExp([(ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                     ConstExp(Entera 1)),
+                    (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                     ConstExp(Entera 2)),
+                    (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                     ConstExp(Entera 3))], Nothing)) : Expresion
+
+- evalProg cond2;
+> val it = ConstInt 1 : Valor
+
+
+(* Se evalua la ejecucion del else *)
+- val cond3 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 3)),
+                   CondExp([
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                               ConstExp(Entera 1)),
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                               ConstExp(Entera 2))
+                           ],
+                           Something (ConstExp(Entera 3))));
+> val cond3 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 3)),
+           CondExp([(ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                     ConstExp(Entera 1)),
+                    (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                     ConstExp(Entera 2))], Something(ConstExp(Entera 3)))) :
+  Expresion
+- evalProg cond3;
+> val it = ConstInt 3 : Valor
+
+(* Condicional no exitoso sin else *)
+- val cond4 = LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 4)),
+                   CondExp([
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                               ConstExp(Entera 1)),
+                            (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                               ConstExp(Entera 2))
+                           ],
+                           Nothing));
+> val cond4 =
+    LetExp(ValDecl(NoRecursiva, IdPat "a", ConstExp(Entera 4)),
+           CondExp([(ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 1))),
+                     ConstExp(Entera 1)),
+                    (ApExp(IdExp "=", ParExp(IdExp "a", ConstExp(Entera 2))),
+                     ConstExp(Entera 2))], Nothing)) : Expresion
+- evalProg cond4;
+! Uncaught exception:
+! NoHayClausulaElse  "CondExp: No hay Else"
+
+```
+
