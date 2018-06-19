@@ -1,0 +1,279 @@
+% simdoc.tex V3.0, 30 March 2010
+
+\documentclass[12pt, times]{simauth}
+
+\usepackage{moreverb}
+
+%\usepackage[T1,mtbold]{mathtime} % commented by ShareLaTeX Team because of compilation errors
+
+\usepackage[
+%dvips, % commented by ShareLaTeX Team because of compilation errors
+colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{pgfplots}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{calligra}
+\usepackage{pdfpages}
+\usepackage{listings}
+\usepackage{color}
+\definecolor{eclipseBlue}{RGB}{42,0.0,255}
+\definecolor{eclipseGreen}{RGB}{63,127,95}
+\lstset {
+  basicstyle=\small\ttfamily,
+  captionpos=b,
+  tabsize=2,
+  columns=fixed,
+  breaklines=true,
+  frame=l,
+  numbers=left,
+  numberstyle=\small\ttfamily,
+  morekeywords= {
+    EQUAL, GREATER, LESS, NONE, SOME, abstraction, abstype, and, andalso, array, as, before, bool, case, char, datatype, do, else, end, eqtype, exception, exn, false, fn, fun, functor, handle, if, in, include, infix, infixr, int, let, list, local, nil, nonfix, not, o, of, op, open, option, orelse, overload, print, raise, real, rec, ref, sharing, sig, signature, string, struct, structure, substring, then, true, type, unit, val, vector, where, while, with, withtype, word
+  },
+  morestring=[b]",
+  morecomment=[s]{(*}{*)},
+  stringstyle=\color{black},
+  identifierstyle=\color{eclipseBlue},
+  keywordstyle=\color{red},
+  commentstyle=\color{eclipseGreen}
+}
+
+
+\def\volumeyear{2010}
+
+\SetKwProg{Fn}{Function}{}{}
+
+\begin{document}
+
+%\runninghead{A.~N.~Other}
+
+\title{
+    {\fontfamily{ppl} \fontsize{30}{1} \selectfont{
+        Proyecto 2: Extensión del intérprete de un lenguaje funcional }
+    }
+}
+
+\author{
+    {\fontfamily{ppl} \fontsize{14}{1} \selectfont{
+        Carlos Martín Flores González, 2015183528 \\
+        Willard Zamora Cárdenas, 2017239202\\
+        Profesor: Ignacio Trejos Zelaya \\
+        19 de Junio del 2018
+        }
+    }
+}
+
+%\address{John Wiley \& Sons, Ltd, The Atrium, Southern Gate, Chichester,
+%West Sussex, PO19~8SQ, UK}
+%
+%\corraddr{Journals Production Department, John Wiley \& Sons, Ltd,
+%The Atrium, Southern Gate, Chichester, West Sussex, PO19~8SQ, UK.}
+
+%\begin{abstract}
+%This paper describes the use of the \LaTeXe\ \textsf{simauth.cls}
+%class file for setting papers for \emph{Statistics in Medicine}.
+%\end{abstract}
+
+%\keywords{class file; \LaTeXe; \emph{Statist.\ Med.}}
+
+\maketitle 
+
+\pagebreak
+
+\tableofcontents
+
+\section{Estrategia de solución}
+Se empezó el desarrollo del proyecto por medio de la exploración del código proporcionado por el profesor. Se ejecutaron pruebas sobre el mismo con el fin de entender cómo funcionaba y las partes del código que se ejercitaban luego de cada invocación.
+
+\paragraph{}Una vez que se tuvo un mejor conocimiento del funcionamiento se estudió el código del intéprete imperativo para incluir el manejo de las declaraciones en este proyecto. Este fue el primer logro. Luego de se empezaron a estudiar los casos de las expresiones \texttt{RegExp} y \texttt{CampoExp} pero en principio no se logró con una solución por lo que se decidió continuar con \texttt{CondExp}. Al estudiar cómo funcionaba el `cond` de Scheme se logró adaptar en relativamente poco tiempo el código que se venia desarrollando para dicha expresión.
+
+Luego de la experiencia anterior, se podría decir que ya se estaba ``entrando en calor'' con el código SML y gracias a esto se fue desarrollando, probando y puliendo el código para las expresiones \texttt{RegExp} y \texttt{CampoExp}. 
+
+Aunque en principio se decidió no implementar \texttt{IterExp} porque era opcional, se empezaron a probar los casos proporcionados por el profesor pero estos no se lograron entender. En la última clase se consultó al profesor sobre esto y dio pie a que se lograra implementar \texttt{IterExp}.
+
+El proceso de desarrollo en general se dio a partir de discusión, desarrollo, pruebas y validación entre los miembros del equipo.
+
+\section{Reflexiones sobre la experiencia}
+
+\subsection{Martín Flores}
+Esta fue mi primera experiencia con Standar ML. A pesar que ya tenía experiencia en otros lenguajes de programción funcionales, este al ser nuevo siempre presenta retos y más cuando hay que cumplir con alguna entrega. Durante el desarrollo del proyecto, navegué por varios sitios Web y pude comprobar que este es un lenguaje que goza de mucha aceptación dentro de las universidades principalemente en cursos de teoría de lenguajes de programación o bien para introducir conceptos de programación funcional.
+
+En principio, aunque puede resultar algo diferente, conforme uno se va adentrando pude notar que es un lenguaje en el que se pueden lograr mucha expresividad, el concepto del `datatype` me parece muy para la definición de tipos a un "bajo costo" en términos de codificación. 
+
+No se pudo encontrar buenas herramientas de \emph{tooling} para desarrollar en SML. El \emph{plugin} de Sublime Text ayuda pero es limitado. El intérprete de \emph{Moscow ML} también es limitado a la hora de introducir código.
+
+\subsection{Willard Zamora} 
+A pesar de los contratiempos en el inicio del proyecto, con la comprehension del código y el lenguaje, el proyecto resulta ser gratificante, a medida que se progresa se adapta la forma de pensar y las soluciones se tornan más sencillas, basta con un empujón del profesor para caer en conciencia de lo que debe hacer algún segmento de código. Hago énfasis en el cambio de paradigma pues resulta entretenido, junto con la creación del intérprete, que conforme se agrega al mismo se ve como se incrementa, aunque sea un poco, la capacidad del lenguaje interpretado. Esta fue mi primera experiencia programando un intérprete y no estuvo mal, sin embargo, considero que se pudo sacar más provecho con entregas incrementales, para familiarizarnos con SML desde antes e invertir más tiempo pensando en la solución y no en como implementar la solución en SML, que fue algo que constantemente me ocurrió.
+
+\subsection{Plano grupal}
+Willard y Martín se conocieron durante el curso y nunca habían trabajado juntos en ningún proyecto, a pesar de esto durante el desarrollo se notó que contaban con intereses similares y se lograron complementar bien. Se considera que la comunicación constante fue un factor clave en lograr que el proyecto avanzara y se fuera puliendo paulatinamente. Durante varias de las video-llamadas que se llevaron a cabo para el desarrollo, los puntos de vista del uno y el otro fueron dándole forma al resultado final.
+
+\section{Documentación del proyecto}
+
+\subsection{Representacion utilizada para los registros y cualquier otro valor semántico}
+
+Se hace uso de un nuevo tipo de valor Registro, el cual se agrega en Val.sml con el objetivo de implementar \texttt{RexExp} y \texttt{CampoExp}
+
+\begin{verbatim}
+   Registros of (Identificador * Valor) list
+\end{verbatim}
+
+\subsection{La solución dada al manejo de registros (expresiones-registro, accesos a campos de un registro)}
+
+En \texttt{RexExp} se hace uso del nuevo tipo valor \texttt{Registros} y la función existente de \texttt{map\_ambiente}, aplicando a cada par (Identificador, Expresion) la funcion que evalua la expresion y la asocia al identificador.
+
+\begin{verbatim}
+  RegExp registros
+  =>  let fun map_exp exp' = evalExp ambiente exp'
+      in  let val lista = map_ambiente map_exp registros
+          in Registros lista
+          end
+      end
+\end{verbatim}
+
+Con respecto a \texttt{CampoExp} simplemente se genera el valor registro a partir de la expresion y en ella se hace busca del identificador pasando como ambiente la lista tipo \texttt{Registros}.
+
+\begin{verbatim}
+  CampoExp (exp', ident)
+  =>  let val Registros lista = evalExp ambiente exp'
+      in  busca ident lista
+      end
+\end{verbatim}
+
+\subsection{La solución dada a la evaluación de la expresión iterativa.}
+
+Se empieza por inicializar una lista con \texttt{ini\_ambiente} (identificador con expresión de inicializar) y durante este proceso se verifica que el dominio sea disjunto, en caso de que lo sea se procede con la evaluación de condicionExp, si esta es verdadera se actualiza la lista con \texttt{act\_ambiente} (identificador con expresión actualizar), si es falsa se evalua \texttt{trueExp}. Durante el proceso del ciclo se va hace un ambiente temporal que incluye el ambiente original concatenado con la lista actual, en el caso inicial es el ambiente original \texttt{<+>} la lista de valores inicializados y en los demás es ambiente original con la lista de valores actualizados, este ambiente temporal hace uso del ambiente original sin extenderlo innecesariamente, manteniendo siempre los últimos valores de la lista. 
+
+\begin{verbatim}
+  IterExp (lista, condicionExp, trueExp)
+  =>  let fun modificar ambiente' exp' = evalExp ambiente' exp'
+      in  let val listaAmb = ini_ambiente modificar lista ambiente
+          in  let fun ciclo listaAmb' 
+              = let 
+                  val iterAmb = (ambiente <+> listaAmb')
+                in
+                  case (evalExp iterAmb condicionExp) of
+                  (ConstBool false) 
+                  => ciclo (act_ambiente modificar lista iterAmb)
+                  | (ConstBool true)  
+                  => evalExp iterAmb trueExp
+                end
+                in ciclo listaAmb
+                end
+          end
+      end
+\end{verbatim}
+
+\subsection{La solución dada a la evaluación de la expresión condicional generalizada}
+
+Para esta evaluación se crearon dos condiciones:
+
+\begin{enumerate}
+    \item Cuando se pasa una lista vacía y una expresión final (caso base)
+    \item Cuando se pasa una lista de la forma \texttt{Condicion * Expresion} y una expresión final
+\end{enumerate}
+
+Cuando se da el caso 1, se verifica primero si la \texttt{expresionFinal} es de alguno de los tipos opcionales definidos (\texttt{Something} o \texttt{Nothing}). En el caso que \texttt{expresionFinal} sea de tipo \texttt{Something}, quiere decir que la expresión si contiene una expresión final que puede ser evaluada. Para evaluar esta expresión se usa \texttt{evalExp}. En el caso que no se incluya una \texttt{expresionFinal} se lanza una excepción.
+
+Cuando se pasa una lista de la forma \texttt{Condicion * Expresion}, primero se evalua la condición (\texttt{cond}) y en el caso que el resultado sea verdadero (\texttt{ConstBool true}) se procede entonces a evaluar la expresion (\texttt{expresion}). Si el resultado de la evaluación de \texttt{cond} sea falso (\texttt{ConstBool false}) entonces se evalua la expresión pero esta vez pasando como argumento el resultado de evaluar el resto de la lista (\texttt{tail}) con la expresión final. De esta forma se va a ir consumiento la lista de forma recursiva y probando cada uno de los pares \texttt{Condicion * Expresion}.
+
+\begin{verbatim}
+  | CondExp ([], expresionFinal)
+     => let
+        in
+          case expresionFinal of
+          (Something expFinal) => evalExp ambiente expFinal
+          | Nothing  => raise NoHayClausulaElse "CondExp: No hay Else"
+        end
+  | CondExp ((cond, expresion)::tail, expresionFinal)
+      => let val condicion = evalExp ambiente cond
+         in 
+          case condicion of
+               (ConstBool false) 
+                => evalExp ambiente (CondExp(tail, expresionFinal))
+             | (ConstBool true)  
+                => evalExp ambiente expresion
+          end 
+\end{verbatim}
+
+\subsection{La solución dada a las extensiones hechas a los patrones (patrones estratificados ['as'], patrones-registro).}
+
+Se crearon dos casos para hacer la concordancia:
+\begin{enumerate}
+    \item Cuando se pasa una lista vacía de identificadores junto con \texttt{Registros} (identificador * valor) (caso base)
+    \item Cuando se pasa una lista de identificadores con la forma \texttt{(id::tail)} junto con \texttt{Registros}
+\end{enumerate}
+
+Cuando se da el caso 1, se retorna un \texttt{ambienteVacio}. Cuando se da el caso 2, se busca el identificador \texttt{id} en la lista de registros para que luego por medio del combinador de ambientes \texttt{<|>}, se combine el resultado de la operación anterior junto con el resultado de la invocación a \texttt{concordar} pasando por parámtro el resto de la lista de identificadores junto con los \texttt{Registros} para ir asociando el resto de identicadores.
+
+A continuación un extracto del código de \texttt{Concord.sml}:
+
+\begin{verbatim}
+|   concordar (RegPat (id::tail)) (Registros (registros))
+    = id |-> (busca id registros) <|> concordar (RegPat (tail)) (Registros (registros))
+|   concordar (RegPat []) (Registros (registros))
+\end{verbatim}
+
+\subsection{La solución dada a la combinación de ambientes con dominios disyuntos (función <|>).}
+Esta solución fue proporcionada por el profesor.
+
+\subsection{Otras modificaciones hechas al intérprete}
+Las sigiuentes funciones fueron agregadas a Ambi.sml, \texttt{ini\_ambiente} y \texttt{act\_ambiente} realizan el mismo recorrido que \texttt{map\_ambiente}, pero sobre una lista de tripletas.
+
+\begin{enumerate}
+    \item \texttt{ini\_ambiente} aplica la expresión de inicialización al identificador y va verificando que los dominios sean disjuntos conforme recorre la lista.
+    \item \texttt{act\_ambiente} aplica la expresión de actualización al identificador.
+    \item \texttt{existe\_en\_lista} busca en una lista de tripletas \texttt{(identificador * \_ * \_ )} que no existan identificadores repetidos.
+\end{enumerate}
+
+
+\begin{verbatim}
+fun existe_en_lista ident []
+    = false
+|   existe_en_lista ident ((ident',_,_)::ambiente)
+    = if ident = ident' 
+      then true
+      else existe_en_lista ident ambiente
+
+fun ini_ambiente f [] ambiente
+    = []
+|   ini_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+    = if existe_en_lista ident cola then
+        raise DominiosNoDisyuntos
+      else
+        (ident,(f ambiente expIni))::(ini_ambiente f cola ambiente)
+
+fun act_ambiente f [] ambiente
+    = []
+|   act_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+\end{verbatim}
+
+\subsection{Casos de prueba y resultados observados}
+
+Las siguientes pruebas fueron tomadas del archivo \texttt{PruebasFun.sml}.
+
+\paragraph{Registros}
+
+\lstinputlisting[]{resultados.sml}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

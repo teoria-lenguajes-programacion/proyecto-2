@@ -11,14 +11,14 @@ datatype Valor =
          | Clausura  of
              Reglas           (* patrones y expresiones *)
            * (Valor Ambiente) (* ambiente prevaleciente
-                                 al definir la función *)
+                                 al definir la funciÃ³n *)
            * (Valor Ambiente) (* ambiente para resolver
                                  llamadas recursivas *)
          | Primitiva of Valor -> Valor
 
 
 (* "Desenrollar" clausuras.
-   Esta operación prepara las clausuras presentes en un
+   Esta operaciÃ³n prepara las clausuras presentes en un
    ambiente para que puedan hacerse llamadas recursivas. *)
 
 fun desenrollar ambR =
