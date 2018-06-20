@@ -46,3 +46,60 @@ fun map_ambiente f []
     = []
 |   map_ambiente f ((ident,valor)::amb)
     = (ident,(f valor))::(map_ambiente f amb)
+
+(* combinación de ambientes disyuntos *)
+exception DominiosNoDisyuntos
+
+fun existe ident []
+    = false
+|   existe ident ((ident',valor)::ambiente)
+    = if ident = ident' 
+      then true
+      else existe ident ambiente
+
+fun existe_en_lista ident []
+    = false
+|   existe_en_lista ident ((ident',_,_)::ambiente)
+    = if ident = ident' 
+      then true
+      else existe_en_lista ident ambiente
+
+fun ini_ambiente f [] ambiente
+    = []
+|   ini_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+    = if existe_en_lista ident cola then
+        raise DominiosNoDisyuntos
+      else
+        (ident,(f ambiente expIni))::(ini_ambiente f cola ambiente)
+
+fun act_ambiente f [] ambiente
+    = []
+|   act_ambiente f ((ident, expIni, expAct)::cola) ambiente    
+    = (ident,(f ambiente expAct))::(act_ambiente f cola ambiente)
+
+(* recorre un ambiente, buscando en el otro.  Si encuentra, hay error *)
+
+infix <|>
+
+fun amb1 <|> amb2 =
+  let fun comprueba []               = amb1 <+> amb2
+      |   comprueba ((ident,_)::amb) = if existe ident amb2 then
+                                         raise DominiosNoDisyuntos
+                                       else
+                                         comprueba amb
+  in
+    comprueba amb1
+  end
+
+
+(* sustracción de dominio *)
+
+infix <--
+
+fun ident <-- [] 
+    = []
+|   ident <-- ((par as (ident',valor))::ambiente)
+    = if ident = ident' then
+        ident <-- ambiente
+      else
+        par :: (ident <-- ambiente)

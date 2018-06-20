@@ -4,6 +4,7 @@
 
 exception ErrorDeValor of string
 and       ErrorDeTipo  of string
+and       NoHayClausulaElse of string
 
 local  (* todas las operaciones se esconden *)
 

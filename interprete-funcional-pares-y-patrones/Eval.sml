@@ -33,17 +33,9 @@ fun evalExp ambiente exp =
              and valD = evalExp ambiente expD
          in Par (valI, valD)
          end
-  | LetExp ((NoRecursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> ambLocal) exp
-         end
-    (* cuando una declaración local es recursiva, se prepara el
-       ambiente "desenrollándolo" *)
-  | LetExp ((Recursiva,(pat,expLocal)), exp)
-      => let val valor    = evalExp ambiente expLocal
-           ; val ambLocal = concordar pat valor
-         in evalExp (ambiente <+> (desenrollar ambLocal)) exp
+  | LetExp (dec, exp)
+      => let val ambientePrima = evalDec ambiente dec
+         in evalExp (ambiente <+> ambientePrima) exp
          end
   | ApExp (operador,argumento)
       => let val operacion = evalExp ambiente operador
@@ -58,6 +50,49 @@ fun evalExp ambiente exp =
          end
   | AbsExp reglas
       => Clausura (reglas, ambiente, ambienteVacio)
+  | RegExp registros
+      => let fun map_exp exp' = evalExp ambiente exp'
+         in let val lista = map_ambiente map_exp registros
+            in Registros lista
+            end
+         end
+  | CampoExp (exp', ident)
+      => let val Registros lista = evalExp ambiente exp'
+         in  busca ident lista
+         end
+  | IterExp (lista, condicionExp, trueExp)
+      => let fun modificar ambiente' exp' = evalExp ambiente' exp'
+         in let val listaAmb = ini_ambiente modificar lista ambiente
+            in let fun ciclo listaAmb' 
+                = let 
+                  val iterAmb = (ambiente <+> listaAmb')
+                in
+                  case (evalExp iterAmb condicionExp) of
+                  (ConstBool false) 
+                  => ciclo (act_ambiente modificar lista iterAmb)
+                  | (ConstBool true)  
+                  => evalExp iterAmb trueExp
+                end
+                in ciclo listaAmb
+                end
+            end
+         end
+  | CondExp ([], expresionFinal)
+     => let
+        in
+          case expresionFinal of
+          (Something expFinal) => evalExp ambiente expFinal
+          | Nothing  => raise NoHayClausulaElse "CondExp: No hay Else"
+        end
+  | CondExp ((cond, expresion)::tail, expresionFinal)
+      => let val condicion = evalExp ambiente cond
+         in 
+          case condicion of
+               (ConstBool false) 
+                => evalExp ambiente (CondExp(tail, expresionFinal))
+             | (ConstBool true)  
+                => evalExp ambiente expresion
+          end   
 
 and aplicarReglas ambiente reglas valor =
   case reglas of
@@ -69,6 +104,34 @@ and aplicarReglas ambiente reglas valor =
        end
        handle PatronesNoConcuerdan   (* seguir con otras reglas *)
               => aplicarReglas ambiente masReglas valor
+
+and evalDec ambiente dec = 
+  case dec of 
+    ValDecl ((NoRecursiva, pat, expLocal))
+      => let val valor = evalExp ambiente expLocal 
+           ; val ambLocal = concordar pat valor
+        in ambLocal
+        end
+  | ValDecl ((Recursiva, pat, expLocal))
+      => let val valor    = evalExp ambiente expLocal
+           ; val ambLocal = concordar pat valor
+        in (desenrollar ambLocal)
+        end
+  | AndDecl (dec1, dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec ambiente dec2
+          in  amb1 <|> amb2 
+          end
+  | SecDecl (dec1,dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec (ambiente <+> amb1) dec2
+          in  amb1 <+> amb2
+          end
+  | LocalDecl (dec1,dec2)
+       => let val amb1 = evalDec ambiente dec1
+              val amb2 = evalDec (ambiente <+> amb1) dec2
+          in  amb2
+          end                     
 ;
 
 (* Los programas son expresiones en nuestro lenguaje.  Los unicos
